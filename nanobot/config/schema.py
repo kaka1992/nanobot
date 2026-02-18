@@ -242,6 +242,7 @@ class WebToolsConfig(Base):
     """Web tools configuration."""
 
     search: WebSearchConfig = Field(default_factory=WebSearchConfig)
+    isActive: bool = Field(default_factory=bool)
 
 
 class ExecToolConfig(Base):
@@ -251,12 +252,15 @@ class ExecToolConfig(Base):
 
 
 class MCPServerConfig(Base):
-    """MCP server connection configuration (stdio or HTTP)."""
+    """MCP server connection configuration (stdio or sse or HTTP)."""
 
     command: str = ""  # Stdio: command to run (e.g. "npx")
     args: list[str] = Field(default_factory=list)  # Stdio: command arguments
     env: dict[str, str] = Field(default_factory=dict)  # Stdio: extra env vars
     url: str = ""  # HTTP: streamable HTTP endpoint URL
+    headers: dict[str, str] = Field(default_factory=dict)
+    tp: str = Field(alias='type', default='stdio')  # "stdio" or "sse" or "http"
+    isActive: bool = False # Whether to enable this server
 
 
 class ToolsConfig(Base):

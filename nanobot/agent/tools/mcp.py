@@ -49,8 +49,11 @@ async def connect_mcp_servers(
     """Connect to configured MCP servers and register their tools."""
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
+    from mcp.client.sse import sse_client
 
     for name, cfg in mcp_servers.items():
+        if not cfg.isActive:
+            continue
         try:
             if cfg.command:
                 params = StdioServerParameters(
@@ -58,10 +61,13 @@ async def connect_mcp_servers(
                 )
                 read, write = await stack.enter_async_context(stdio_client(params))
             elif cfg.url:
-                from mcp.client.streamable_http import streamable_http_client
-                read, write, _ = await stack.enter_async_context(
-                    streamable_http_client(cfg.url)
-                )
+                if cfg.tp == 'sse':
+                    read, write = await stack.enter_async_context(sse_client(cfg.url, headers=cfg.headers or None))
+                else:
+                    from mcp.client.streamable_http import streamable_http_client
+                    read, write, _ = await stack.enter_async_context(
+                        streamable_http_client(cfg.url)
+                    )
             else:
                 logger.warning(f"MCP server '{name}': no command or url configured, skipping")
                 continue
