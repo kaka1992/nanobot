@@ -114,12 +114,8 @@ class AgentLoop:
             self.tools.register(WebFetchTool())
         
         # Message tool
-        message_tool = MessageTool(send_callback=self.bus.publish_outbound)
-        self.tools.register(message_tool)
-
-        # Spawn tool (for subagents)
-        spawn_tool = SpawnTool(manager=self.subagents)
-        self.tools.register(spawn_tool)
+        self.tools.register(MessageTool(send_callback=self.bus.publish_outbound))
+        self.tools.register(SpawnTool(manager=self.subagents))
 
         # Cron tool (for scheduling)
         if self.cron_service:

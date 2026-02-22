@@ -36,6 +36,7 @@ class MCPToolWrapper(Tool):
         from mcp import types
         result = await self._session.call_tool(self._original_name, arguments=kwargs)
         parts = []
+        logger.debug(f"Processing mcp execute, tool name {self._original_name}, arguments {kwargs}, result {result}")
         for block in result.content:
             if isinstance(block, types.TextContent):
                 parts.append(block.text)
