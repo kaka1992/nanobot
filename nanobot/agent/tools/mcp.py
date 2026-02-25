@@ -55,7 +55,7 @@ class MCPToolWrapper(Tool):
 
 
 async def connect_mcp_servers(
-    mcp_servers: dict, registry: ToolRegistry, stack: AsyncExitStack
+        mcp_servers: dict, registry: ToolRegistry, stack: AsyncExitStack
 ) -> None:
     """Connect to configured MCP servers and register their tools."""
     from mcp import ClientSession, StdioServerParameters
@@ -75,16 +75,15 @@ async def connect_mcp_servers(
                 if cfg.tp == 'sse':
                     read, write = await stack.enter_async_context(sse_client(cfg.url, headers=cfg.headers or None))
                 else:
-                     http_client = await stack.enter_async_context(
-                    httpx.AsyncClient(
+                    from mcp.client.streamable_http import streamable_http_client
+                    http_client = await stack.enter_async_context(httpx.AsyncClient(
                         headers=cfg.headers or None,
                         follow_redirects=True,
                         timeout=None,
+                    ))
+                    read, write, _ = await stack.enter_async_context(
+                        streamable_http_client(cfg.url, http_client=http_client)
                     )
-                )
-                read, write, _ = await stack.enter_async_context(
-                    streamable_http_client(cfg.url, http_client=http_client)
-                )
             else:
                 logger.warning("MCP server '{}': no command or url configured, skipping", name)
                 continue
